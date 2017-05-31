@@ -1,30 +1,30 @@
-### rxkit 介绍 ###
+### 介绍 ###
 
-rxkit 是一个Yii2的扩展包，对Yii2本身进行了一些功能强化与扩展。
+**rxactiverecord**对现有\yii\db\ActiveRecord的增强，提供了Nested操作，以及Polymorphic Relation。
 
 [![Latest Stable Version](https://poser.pugx.org/rainyx/rxkit/v/stable)](https://packagist.org/packages/rainyx/rxkit)
 [![License](https://poser.pugx.org/rainyx/rxkit/license)](https://packagist.org/packages/rainyx/rxkit)
 [![Total Downloads](https://poser.pugx.org/rainyx/rxkit/downloads)](https://packagist.org/packages/rainyx/rxkit)
 
 ### 安装 ###
-rxkit 使用 composer 进行安装。什么是[composer](http://getcomposer.org/download/)？
+扩展使用 composer 进行安装。什么是[composer](http://getcomposer.org/download/)？
 
 如需安装，可以在Yii2项目中执行以下命令
 ```
-$ php composer.phar require rainyx/rxkit "@dev"
+$ php composer.phar require rainyx/rxactiverecord "*"
 ```
 
 或者在 `componser.json` 文件中添加依赖
 
 ```
-"rainyx/rxkit": "@dev"
+"rainyx/rxactiverecord": "*"
 ```
 
 ### 使用 ###
 ----------
 
 #### 1. Nested ActiveRecord ####
-RXKit 扩展了 `\yii\db\ActiveRecord` 类，使其可以支持Nested创建、修改其关联对象。
+**rxactiverecord** 扩展了 `\yii\db\ActiveRecord` 类，使其可以支持Nested创建、修改其关联对象。
 
 定义Relation
 ```php
@@ -96,7 +96,7 @@ $article->save();
 
 #### 2. Polymorphic Relation ####
 
-rxkit 提供了一种类似其他ORM框架的 Polymorphic Relation，例如Laravel、Ruby On Rails 等。
+**rxactiverecord** 提供了一种类似其他ORM框架的 Polymorphic Relation，例如Laravel、Ruby On Rails 等。
 
 使用方法
 

@@ -2,9 +2,9 @@
 
 **rxactiverecord**对现有\yii\db\ActiveRecord的增强，提供了Nested操作，以及Polymorphic Relation。
 
-[![Latest Stable Version](https://poser.pugx.org/rainyx/rxkit/v/stable)](https://packagist.org/packages/rainyx/rxkit)
-[![License](https://poser.pugx.org/rainyx/rxkit/license)](https://packagist.org/packages/rainyx/rxkit)
-[![Total Downloads](https://poser.pugx.org/rainyx/rxkit/downloads)](https://packagist.org/packages/rainyx/rxkit)
+[![Latest Stable Version](https://poser.pugx.org/rainyx/rxactiverecord/v/stable)](https://packagist.org/packages/rainyx/rxactiverecord)
+[![License](https://poser.pugx.org/rainyx/rxactiverecord/license)](https://packagist.org/packages/rainyx/rxactiverecord)
+[![Total Downloads](https://poser.pugx.org/rainyx/rxactiverecord/downloads)](https://packagist.org/packages/rainyx/rxactiverecord)
 
 ### 安装 ###
 扩展使用 composer 进行安装。什么是[composer](http://getcomposer.org/download/)？

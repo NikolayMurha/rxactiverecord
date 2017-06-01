@@ -20,9 +20,10 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
     private $_unrelatedRecords = [];
 
     /**
+     * 接受Nested Attributes的Relation
      * @return array
      */
-    public function acceptNestedAttributes() {
+    public function acceptNestedAttributesFor() {
         return [];
     }
 
@@ -227,6 +228,38 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
         parent::afterSave($insert, $changedAttributes);
     }
 
+    private function _foreachDirtyRelatedRecords(callable $callable) {
+        foreach ($this->_dirtyRelatedRecords as $records) {
+            foreach ($records as $record) {
+                $callable($record);
+            }
+        }
+    }
+
+    private function _foreachUnrelatedRecords(callable $callable) {
+        foreach ($this->_unrelatedRecords as $records) {
+            foreach ($records as $record) {
+                $callable($record);
+            }
+        }
+    }
+
+
+    public function validate($attributeNames = null, $clearErrors = true)
+    {
+        $result = parent::validate($attributeNames, $clearErrors);
+
+        $this->_foreachDirtyRelatedRecords(function(\app\models\base\ActiveRecord $record) use ($result) {
+            $result = $result && $record->validate();
+        });
+
+        $this->_foreachUnrelatedRecords(function(\app\models\base\ActiveRecord $record) use ($result) {
+            $result = $result && $record->validate();
+        });
+
+        return $result;
+    }
+
     /**
      * @return object
      */
@@ -311,8 +344,8 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
     public function __call($name, $params)
     {
         if (strpos($name, 'build') == 0
-            && ($relation = $this->getRelation(lcfirst(substr($name, 5)))) != null) {
-            return $this->buildUnrelatedRecord($name, $params[0]);
+            && $this->getRelation($relationName = lcfirst(substr($name, 5))) != null) {
+            return $this->buildUnrelatedRecord($relationName, !empty($params) ? $params[0] : []);
         }
         return parent::__call($name, $params);
     }

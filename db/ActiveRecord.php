@@ -44,7 +44,7 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
                 continue;
             }
 
-            $relation = $this->getRelation($name);
+            $relation = $this->getRelation($name, false);
 
             if ($relation->multiple) {
 
@@ -129,7 +129,7 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
      */
     public function buildUnrelatedRecord($name, $param)
     {
-        $relation = $this->getRelation($name);
+        $relation = $this->getRelation($name, false);
 
         /* @var ActiveRecord $instance */
         $clazz = $relation->modelClass;
@@ -137,6 +137,11 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
         $record->setAttributes($param);
 
         $this->addUnrelatedRecord($name, $record);
+        // 如果是hasOne，就添加到related
+        if (!$relation->multiple)
+        {
+            $this->populateRelation($name, $record);
+        }
         return $record;
     }
 
@@ -150,7 +155,7 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
     {
         $relatedRecord = null;
 
-        $relation = $this->getRelation($name);
+        $relation = $this->getRelation($name, false);
         $result = $this->$name;
 
         if ($relation->multiple) {
@@ -197,15 +202,19 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
         /* @var ActiveRecord $record */
 
         foreach ($this->_dirtyRelatedRecords as $relationName=>$records) {
-
             foreach ($records as $record) {
                 $record->save();
             }
         }
 
+
         foreach ($this->_unrelatedRecords as $relationName=>$records) {
 
-            $relation = $this->getRelation($relationName);
+            if (!method_exists($this, 'get'.ucfirst($relationName)))
+            {
+                continue;
+            }
+            $relation = $this->getRelation($relationName, false);
 
             // Polymorphic relation.
             if ($relation->as) {
@@ -228,34 +237,47 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
         parent::afterSave($insert, $changedAttributes);
     }
 
-    private function _foreachDirtyRelatedRecords(callable $callable) {
-        foreach ($this->_dirtyRelatedRecords as $records) {
+    private static function _foreachNestedRecords($records, callable $callable)
+    {
+        foreach ($records as $relationName=>$records) {
             foreach ($records as $record) {
-                $callable($record);
+                $callable($relationName, $record);
             }
         }
     }
 
-    private function _foreachUnrelatedRecords(callable $callable) {
-        foreach ($this->_unrelatedRecords as $records) {
-            foreach ($records as $record) {
-                $callable($record);
-            }
-        }
-    }
-
-
+    /**
+     * Nested validate
+     * @param null $attributeNames
+     * @param bool $clearErrors
+     * @return bool
+     */
     public function validate($attributeNames = null, $clearErrors = true)
     {
+
         $result = parent::validate($attributeNames, $clearErrors);
 
-        $this->_foreachDirtyRelatedRecords(function(\app\models\base\ActiveRecord $record) use ($result) {
-            $result = $result && $record->validate();
-        });
+        // Make nested errors.
+        $errors = [];
+        static::_foreachNestedRecords($this->_dirtyRelatedRecords + $this->_unrelatedRecords,
+            function($relationName, \app\models\base\ActiveRecord $record)
+            use (&$result, &$errors, $attributeNames, $clearErrors) {
+                if (!$record->validate(isset($attributeNames[$relationName]) ? $attributeNames[$relationName] : null,
+                    $clearErrors))
+                {
+                    $result = false;
+                    if (!isset($errors[$relationName]))
+                    {
+                        $errors[$relationName] = ucfirst($relationName). ' has error(s)';
+                    }
+                }
+            }
+        );
 
-        $this->_foreachUnrelatedRecords(function(\app\models\base\ActiveRecord $record) use ($result) {
-            $result = $result && $record->validate();
-        });
+        if (!empty($errors))
+        {
+            $this->addErrors($errors);
+        }
 
         return $result;
     }
@@ -323,7 +345,7 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
         /* @var $class ActiveRecordInterface */
         /* @var $query ActiveQuery */
 
-        $relation = (new $class)->getRelation($name);
+        $relation = (new $class)->getRelation($name, false);
         $polymorphic = $relation->polymorphic;
 
         $query = $class::find();
@@ -344,8 +366,9 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
     public function __call($name, $params)
     {
         if (strpos($name, 'build') == 0
-            && $this->getRelation($relationName = lcfirst(substr($name, 5))) != null) {
-            return $this->buildUnrelatedRecord($relationName, !empty($params) ? $params[0] : []);
+            && $this->getRelation($relationName = lcfirst(substr($name, 5)), false) != null) {
+            $record = $this->buildUnrelatedRecord($relationName, !empty($params) ? $params[0] : []);
+            return $record;
         }
         return parent::__call($name, $params);
     }

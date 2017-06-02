@@ -210,10 +210,6 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
 
         foreach ($this->_unrelatedRecords as $relationName=>$records) {
 
-            if (!method_exists($this, 'get'.ucfirst($relationName)))
-            {
-                continue;
-            }
             $relation = $this->getRelation($relationName, false);
 
             // Polymorphic relation.

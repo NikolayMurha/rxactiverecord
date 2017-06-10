@@ -6,7 +6,7 @@
  */
 
 
-namespace rainyx\rxkit\db;
+namespace rainyx\rxactiverecord\db;
 
 /**
  * Class ActiveCollectionProxy

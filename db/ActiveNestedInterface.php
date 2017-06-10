@@ -5,7 +5,7 @@
  * @version ${VERSION}
  */
 
-namespace rainyx\rxkit\db;
+namespace rainyx\rxactiverecord\db;
 
 /**
  * Interface ActiveNestedInterface

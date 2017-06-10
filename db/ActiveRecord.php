@@ -256,7 +256,7 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
         // Make nested errors.
         $errors = [];
         static::_foreachNestedRecords($this->_dirtyRelatedRecords + $this->_unrelatedRecords,
-            function($relationName, \app\models\base\ActiveRecord $record)
+            function($relationName, ActiveRecord $record)
             use (&$result, &$errors, $attributeNames, $clearErrors) {
                 if (!$record->validate(isset($attributeNames[$relationName]) ? $attributeNames[$relationName] : null,
                     $clearErrors))

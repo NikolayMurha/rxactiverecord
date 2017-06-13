@@ -19,6 +19,21 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
     private $_dirtyRelatedRecords = [];
     private $_unrelatedRecords = [];
 
+
+    /**
+     * @param array $row
+     * @return static
+     */
+    public static function instantiate($row)
+    {
+        if (isset($row['type']))
+        {
+            $modelClass = $row['type'];
+            return new $modelClass;
+        }
+        return new static;
+    }
+
     /**
      * 接受Nested Attributes的Relation
      * @return array
@@ -40,17 +55,15 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
     {
         foreach ($values as $name=>$value) {
 
-            if (!method_exists($this, 'get'.ucfirst($name))) {
+            if (!method_exists($this, 'get'.ucfirst($name))
+                || ($relation = $this->getRelation($name, false)) == null) {
                 continue;
             }
-
-            $relation = $this->getRelation($name, false);
 
             if ($relation->multiple) {
 
                 // Has many
                 foreach ($value as $attributes) {
-                    //var_dump($relationAttributes);
                     // TODO Replace id with primaryKey.
                     if (isset($attributes['id'])) {
                         $this->updateRelatedRecord($name, $attributes);
@@ -189,6 +202,27 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
             $this->addDirtyRecord($name, $relatedRecord);
         }
 
+    }
+
+    /**
+     * @param bool $insert
+     * @return bool
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert))
+        {
+            if ($insert)
+            {
+                if (in_array('type', $this->attributes()))
+                {
+                    $this->setAttribute('type', get_called_class());
+                }
+            }
+            return true;
+        }
+
+        return false;
     }
 
     /**

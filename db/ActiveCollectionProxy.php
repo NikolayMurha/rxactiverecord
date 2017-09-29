@@ -95,7 +95,7 @@ class ActiveCollectionProxy extends \yii\base\Object implements \ArrayAccess, \C
         $this->_loadRelatedRecordsNecessary();
         $primaryModel = $this->query->primaryModel;
 
-        $combined = ($this->_relatedRecords + $primaryModel->getUnrelatedRecords($this->relationName));
+        $combined = array_merge($this->_relatedRecords, $primaryModel->getUnrelatedRecords($this->relationName));
 
         return $combined;
     }
@@ -110,5 +110,15 @@ class ActiveCollectionProxy extends \yii\base\Object implements \ArrayAccess, \C
     public function getIterator()
     {
         return new \ArrayIterator($this->combinedRecords);
+    }
+
+    function __get($name)
+    {
+        if (preg_match('/\d+/', $name))
+        {
+            return $this->combinedRecords[$name];
+        }
+
+        return parent::__get($name);
     }
 }

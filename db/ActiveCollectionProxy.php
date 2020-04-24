@@ -15,7 +15,7 @@ namespace rainyx\rxactiverecord\db;
  * @author rainyx <atrainyx#gmail.com>
  * @since 1.0
  */
-class ActiveCollectionProxy extends \yii\base\Object implements \ArrayAccess, \Countable, \IteratorAggregate {
+class ActiveCollectionProxy extends \yii\base\BaseObject implements \ArrayAccess, \Countable, \IteratorAggregate {
 
 
     /**

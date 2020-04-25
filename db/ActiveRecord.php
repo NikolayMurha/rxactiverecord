@@ -317,12 +317,12 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
      */
     public static function find()
     {
-        return \Yii::createObject(ActiveQuery::className(), [get_called_class()]);
+        return \Yii::createObject(ActiveQuery::class, [get_called_class()]);
     }
 
 
     public function getClassName() {
-        return static::className();
+        return static::class;
     }
 
     /**
@@ -336,7 +336,7 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
         /* @var $query ActiveQuery */
 
         if (!$this->{$typeName}) {
-            $this->{$typeName} = ActiveRecord::className();
+            $this->{$typeName} = ActiveRecord::class;
         }
         $class = $this->{$typeName};
         $query = $class::find();
@@ -380,7 +380,7 @@ class ActiveRecord extends \yii\db\ActiveRecord  implements ActiveNestedInterfac
 
         $query = $class::find();
         $query->primaryModel = $this;
-        $query->link = [$polymorphic[1]=>'id', $polymorphic[0]=>'className'];
+        $query->link = [$polymorphic[1]=>'id', get_class($polymorphic[0])];
         $query->multiple = $multiple;
         $query->as = $name;
         $query->polymorphic = $polymorphic;

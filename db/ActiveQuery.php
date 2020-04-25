@@ -27,7 +27,7 @@ class ActiveQuery extends \yii\db\ActiveQuery {
     public function findFor($name, $model)
     {
         if ($this->multiple) {
-            return \Yii::createObject(ActiveCollectionProxy::className(), [
+            return \Yii::createObject(ActiveCollectionProxy::class, [
                 $name,
                 $this,
             ]);
